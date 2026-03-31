@@ -7,13 +7,11 @@ from odoo import models
 class MailThread(models.AbstractModel):
     _inherit = "mail.thread"
 
-    def _message_add_suggested_recipient(
-        self, result, partner=None, email=None, lang=None, reason=""
-    ):
-        # Uncheck all the suggested recipients updating the dictionary value
-        res = super()._message_add_suggested_recipient(
-            result, partner=partner, email=email, lang=lang, reason=reason
+    def _message_add_suggested_recipients(self, force_primary_email=False):
+        suggested = super()._message_add_suggested_recipients(
+            force_primary_email=force_primary_email
         )
-        for item in res:
-            item.update({"checked": False})
-        return res
+        for rec in self:
+            suggested[rec.id]['partners'] = self.env['res.partner']
+            suggested[rec.id]['email_to_lst'] = []
+        return suggested
